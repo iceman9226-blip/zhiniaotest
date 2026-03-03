@@ -55,7 +55,7 @@ const AnalysisDashboard: React.FC<DashboardProps> = ({ result }) => {
               href={result.sourceUrl} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-sm font-medium text-[#F6483B] hover:text-[#D32F2F] hover:underline"
+              className="flex items-center gap-1.5 text-sm font-medium text-[#FF8839] hover:text-[#FF6B1A] hover:underline"
             >
               <span>打开 Figma 查看</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -142,10 +142,10 @@ const AnalysisDashboard: React.FC<DashboardProps> = ({ result }) => {
                 <TrendingUp className="w-5 h-5 text-slate-400" />
                 关键优化建议
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2">
                 {result.recommendations.map((rec, i) => (
-                  <li key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white border border-slate-100 shadow-sm transition-colors">
-                    <div className="mt-0.5 w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 text-xs font-bold font-mono">
+                  <li key={i} className="flex items-start gap-2.5 py-1.5 transition-colors">
+                    <div className="mt-0.5 w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold font-mono">
                       {i + 1}
                     </div>
                     <span className="text-slate-700 text-sm leading-relaxed">{rec}</span>
@@ -230,6 +230,44 @@ const AnalysisDashboard: React.FC<DashboardProps> = ({ result }) => {
           </span>
         </div>
         <IssuesTable issues={result.issues} />
+      </div>
+
+      {/* Nielsen Chatbot Guidance */}
+      <div className="bg-gradient-to-r from-[#FF8839]/10 to-purple-500/10 rounded-2xl p-6 border border-[#FF8839]/20 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm relative overflow-hidden">
+        {/* Decorative background blur */}
+        <div className="absolute -right-20 -top-20 w-64 h-64 bg-[#FF8839]/20 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div className="flex items-center gap-5 relative z-10">
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md shrink-0">
+            <img 
+              src="https://nimg.ws.126.net/?url=http%3A%2F%2Fspider.ws.126.net%2Fa51f9638ba088baf086f6559b2f080ff.jpeg&thumbnail=660x2147483647&quality=80&type=jpg" 
+              alt="Jakob Nielsen"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">需要更深入的设计指导？</h3>
+            <p className="text-slate-600 text-sm">
+              点击右下角的头像，与 <strong>Jakob Nielsen</strong> 专家助手对话，获取基于 10 大可用性原则的定制化优化方案。
+            </p>
+          </div>
+        </div>
+        
+        <div className="relative z-10 shrink-0">
+          <button 
+            onClick={() => {
+              // Find the chatbot button and click it
+              const chatBtn = document.querySelector('button[title="Ask Nielsen"]') as HTMLButtonElement;
+              if (chatBtn) chatBtn.click();
+            }}
+            className="flex items-center gap-2 px-6 py-3 bg-white text-[#FF8839] font-bold rounded-full shadow-sm hover:shadow-md border border-[#FF8839]/20 hover:border-[#FF8839] transition-all hover:-translate-y-0.5"
+          >
+            立即咨询专家
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
       </div>
 
     </div>

@@ -70,9 +70,13 @@ export interface HistoryItem {
   timestamp: number;
   previewUrl: string;
   result: AnalysisResult;
+  userId?: string;
+  userName?: string;
 }
 
 export interface User {
+  id: string;
   email: string;
   name: string;
+  role: 'admin' | 'user';
 }

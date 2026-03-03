@@ -53,7 +53,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
       <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         
         {/* Top Gradient Line */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF8839] via-[#FF9F5A] to-[#FFB67B]"></div>
         
         <button 
           onClick={onClose}
@@ -80,7 +80,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
                     type="text" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-400"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400"
                     placeholder="您的称呼"
                   />
                 </div>
@@ -96,7 +96,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-400"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400"
                   placeholder="name@example.com"
                 />
               </div>
@@ -111,7 +111,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-400"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400"
                   placeholder="••••••••"
                 />
               </div>
@@ -147,7 +147,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
                   setIsRegister(!isRegister);
                   setError('');
                 }}
-                className="ml-1 text-blue-600 hover:underline font-medium"
+                className="ml-1 text-[#FF8839] hover:underline font-medium"
               >
                 {isRegister ? '直接登录' : '免费注册'}
               </button>

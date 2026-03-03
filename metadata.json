@@ -1,5 +1,5 @@
 {
-  "name": "CloudMetric AI - B端产品易用性分析仪",
+  "name": "B端产品易用性分析仪",
   "description": "基于易用性度量方法的自动化 B 端产品易用性测试与评分工具。上传 UI 设计稿，获取即时专家评估。",
   "requestFramePermissions": []
 }
