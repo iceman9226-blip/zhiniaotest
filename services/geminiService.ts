@@ -25,7 +25,7 @@ export const analyzeImage = async (base64Image: string, mimeType: string, source
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-pro-preview',
+      model: 'gemini-2.5-flash',
       contents: {
         parts: [
           { inlineData: { mimeType: mimeType || 'image/jpeg', data: base64Image } },
@@ -132,8 +132,12 @@ export const analyzeImage = async (base64Image: string, mimeType: string, source
         throw new Error("服务暂时不可用 (503)。请稍后重试。");
     }
 
-    // Default error
-    throw new Error("分析失败，请检查网络连接或稍后重试。");
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+        throw new Error("网络连接失败。如果您在中国大陆，请确保已开启全局代理或配置了正确的路由规则以访问 Google 服务。");
+    }
+
+    // Default error with actual message
+    throw new Error(`分析失败: ${msg || "未知错误，请检查网络连接或控制台日志。"}`);
   }
 };
 
@@ -215,7 +219,7 @@ export const sendChatMessage = async function* (
   });
 
   const responseStream = await ai.models.generateContentStream({
-    model: 'gemini-3.1-pro-preview',
+    model: 'gemini-2.5-flash',
     contents,
     config: {
       systemInstruction,
