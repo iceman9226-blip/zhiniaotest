@@ -226,13 +226,13 @@ const App: React.FC = () => {
       />
 
       {/* Vercel-style Animated SVG Background */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden flex justify-center">
-        {/* Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+      <div className="fixed inset-0 -z-10 bg-slate-50 pointer-events-none overflow-hidden flex justify-center">
+        {/* Grid - White lines on very light slate background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
-        {/* Rotating Glow */}
-        <div className="absolute top-[-200px] w-[800px] h-[800px] opacity-20">
-          <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,#FF8839_0deg,#8b5cf6_120deg,#ec4899_240deg,#FF8839_360deg)] animate-[spin_8s_linear_infinite] rounded-full blur-[80px]"></div>
+        {/* Rotating Glow - Larger and more obvious deformation */}
+        <div className="absolute top-[-300px] w-[1200px] h-[800px] opacity-40">
+          <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,#FF8839_0deg,#8b5cf6_120deg,#ec4899_240deg,#FF8839_360deg)] animate-[spin_10s_linear_infinite] rounded-[40%_60%_70%_30%/40%_50%_60%_50%] blur-[100px]"></div>
         </div>
       </div>
 
@@ -254,7 +254,7 @@ const App: React.FC = () => {
       )}
 
       {/* Nav */}
-      <nav className="bg-white/70 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50">
+      <nav className="bg-white/70 backdrop-blur-xl border-b border-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
           <div
             className="flex items-center gap-2 cursor-pointer"
@@ -287,7 +287,7 @@ const App: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-white border border-slate-200 hover:border-slate-300 transition-all shadow-sm"
+                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/50 text-slate-800 transition-all shadow-sm"
                 >
                   <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#FF8839] to-purple-500 flex items-center justify-center text-[10px] font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
@@ -303,8 +303,8 @@ const App: React.FC = () => {
                       className="fixed inset-0 z-10"
                       onClick={() => setIsUserMenuOpen(false)}
                     ></div>
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1 animate-in slide-in-from-top-2 fade-in duration-200">
-                      <div className="px-4 py-2 border-b border-slate-100">
+                    <div className="absolute right-0 mt-2 w-48 bg-white/80 backdrop-blur-xl border border-white/50 rounded-xl shadow-xl z-20 py-1 animate-in slide-in-from-top-2 fade-in duration-200">
+                      <div className="px-4 py-2 border-b border-slate-100/50">
                         <p className="text-xs text-slate-400">已登录账号</p>
                         <p className="text-sm text-slate-900 truncate">
                           {user.email}
@@ -312,7 +312,7 @@ const App: React.FC = () => {
                       </div>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-rose-500 hover:bg-slate-50 flex items-center gap-2"
+                        className="w-full text-left px-4 py-2 text-sm text-rose-500 hover:bg-white/50 flex items-center gap-2 transition-colors"
                       >
                         <LogOut className="w-4 h-4" /> 退出登录
                       </button>
@@ -323,7 +323,7 @@ const App: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10"
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/50 text-slate-800 text-sm font-bold transition-all shadow-sm"
               >
                 <LogIn className="w-4 h-4" /> 登录 / 注册
               </button>
@@ -343,14 +343,14 @@ const App: React.FC = () => {
             }}
           >
             <h1 
-              className="inline-block text-5xl font-extrabold text-slate-900 mb-6 tracking-tight transition-all duration-75 ease-out"
+              className="inline-block text-5xl font-extrabold text-black/90 mb-6 tracking-tight transition-all duration-75 ease-out"
             >
               B端产品易用性度量
             </h1>
-            <p className="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-black/60 max-w-2xl mx-auto leading-relaxed">
               上传高保真原型图，AI 将基于 6 项关键易用性指标进行深度启发式评估。
             </p>
-            <div className="max-w-3xl mx-auto mt-12 bg-white/50 backdrop-blur-xl rounded-2xl p-2 border border-slate-200/60 shadow-2xl shadow-slate-200/50">
+            <div className="max-w-3xl mx-auto mt-12 bg-white/50 backdrop-blur-xl rounded-2xl p-2 border border-white shadow-2xl shadow-slate-200/50">
               <FileUpload onFileSelect={handleFileSelect} isAnalyzing={false} />
             </div>
 

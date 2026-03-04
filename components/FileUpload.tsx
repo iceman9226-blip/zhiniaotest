@@ -157,7 +157,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, isAnalyzing }) =>
     <div className="flex flex-col">
       <div 
         className={`relative w-full border-2 border-dashed rounded-2xl py-16 px-10 transition-all duration-300 ease-in-out ${
-          dragActive ? 'border-[#FF8839] bg-[#FF8839]/5 scale-[1.02]' : 'border-slate-300 bg-white hover:border-[#FF8839]/50 hover:bg-slate-50'
+          dragActive ? 'border-[#FF8839] bg-[#FF8839]/10 scale-[1.02]' : 'border-white bg-white/40 backdrop-blur-sm hover:border-white/80 hover:bg-white/60'
         } ${(isAnalyzing || isUploading) ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
