@@ -271,13 +271,13 @@ const App: React.FC = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setView("history")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${view === "history" ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all active:scale-95 ${view === "history" ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
             >
               <Clock className="w-4 h-4" /> 历史记录
             </button>
             <button
               onClick={() => setView("help")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${view === "help" ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all active:scale-95 ${view === "help" ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
             >
               <HelpCircle className="w-4 h-4" /> 帮助文档
             </button>
@@ -287,7 +287,7 @@ const App: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/50 text-slate-800 transition-all shadow-sm"
+                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/50 text-slate-800 transition-all active:scale-95 shadow-sm"
                 >
                   <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#FF8839] to-purple-500 flex items-center justify-center text-[10px] font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
@@ -323,7 +323,7 @@ const App: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/50 text-slate-800 text-sm font-bold transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/50 text-slate-800 text-sm font-bold transition-all active:scale-95 shadow-sm"
               >
                 <LogIn className="w-4 h-4" /> 登录 / 注册
               </button>

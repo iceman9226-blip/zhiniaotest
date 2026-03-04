@@ -17,7 +17,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
         <div className="absolute top-0 left-0">
           <button
             onClick={onBack}
-            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors flex items-center gap-2"
+            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-all active:scale-95 flex items-center gap-2"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="text-sm font-medium">返回首页</span>
@@ -47,7 +47,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-all active:scale-95"
             title="返回首页"
           >
             <ArrowLeft className="w-6 h-6" />
@@ -67,7 +67,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
           <div 
             key={item.id}
             onClick={() => onSelect(item)}
-            className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md hover:border-[#FF8839]/50 transition-all cursor-pointer group flex flex-col"
+            className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md hover:border-[#FF8839]/50 transition-all active:scale-[0.98] cursor-pointer group flex flex-col"
           >
             {/* Image Preview Area */}
             <div className="aspect-video bg-slate-100 relative overflow-hidden border-b border-slate-100">
@@ -123,7 +123,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
                   
                   <button 
                     onClick={(e) => onDelete(item.id, e)}
-                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors z-10"
+                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all active:scale-90 z-10"
                     title="删除记录"
                   >
                     <Trash2 className="w-4 h-4" />

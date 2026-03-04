@@ -70,7 +70,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ base64Image, mimeType, analysisResult
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-8 right-8 w-14 h-14 bg-[#FF8839] hover:bg-[#e67a33] text-white rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-110 z-50 group overflow-hidden border-2 border-white"
+          className="fixed bottom-8 right-8 w-14 h-14 bg-[#FF8839] hover:bg-[#e67a33] text-white rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-50 group overflow-hidden border-2 border-white"
           title="Ask Nielsen"
         >
           <img 
@@ -201,9 +201,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ base64Image, mimeType, analysisResult
               <button
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isLoading}
-                className="absolute right-1.5 p-1.5 bg-[#FF8839] text-white rounded-full disabled:opacity-50 disabled:bg-slate-300 transition-colors"
+                className="absolute right-1.5 p-1.5 bg-[#FF8839] text-white rounded-full disabled:opacity-50 disabled:bg-slate-300 transition-all active:scale-95"
               >
-                <Send className="w-4 h-4" />
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </button>
             </div>
           </div>

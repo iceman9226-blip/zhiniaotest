@@ -86,7 +86,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
                     type="text" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400"
+                    disabled={isLoading}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="您的称呼"
                   />
                 </div>
@@ -102,7 +103,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400"
+                  disabled={isLoading}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="name@example.com"
                 />
               </div>
@@ -117,7 +119,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400"
+                  disabled={isLoading}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:outline-none focus:border-[#FF8839] focus:ring-1 focus:ring-[#FF8839] transition-all placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="••••••••"
                 />
               </div>
@@ -132,7 +135,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full bg-slate-900 text-white font-bold py-2.5 rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-slate-900/20"
+              className="w-full bg-slate-900 text-white font-bold py-2.5 rounded-lg hover:bg-slate-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-slate-900/20"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
