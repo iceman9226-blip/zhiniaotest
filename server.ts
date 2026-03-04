@@ -26,7 +26,7 @@ async function startServer() {
 
   // Login
   app.post("/api/login", async (req, res) => {
-    const { email } = req.body;
+    const { email, name } = req.body;
     
     if (supabase) {
       try {
@@ -34,8 +34,12 @@ async function startServer() {
           .from('users')
           .select('*')
           .eq('email', email)
-          .single();
+          .maybeSingle();
           
+        if (error) {
+          throw error;
+        }
+
         if (user) {
           res.json({ success: true, user });
         } else {
@@ -43,7 +47,7 @@ async function startServer() {
           const newUser = {
             id: Date.now().toString(),
             email,
-            name: email.split('@')[0],
+            name: name || email.split('@')[0],
             role: email === 'iceman9226@gmail.com' ? 'admin' : 'user',
           };
           const { data, error: insertError } = await supabase
@@ -68,7 +72,7 @@ async function startServer() {
         const newUser: User = {
           id: Date.now().toString(),
           email,
-          name: email.split('@')[0],
+          name: name || email.split('@')[0],
           role: email === 'iceman9226@gmail.com' ? 'admin' : 'user',
         };
         memoryUsers.push(newUser);
@@ -83,7 +87,7 @@ async function startServer() {
     
     if (supabase) {
       try {
-        const { data: user } = await supabase.from('users').select('*').eq('id', userId).single();
+        const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
         if (!user) return res.status(401).json({ error: "Unauthorized" });
 
         let query = supabase.from('history').select('*').order('timestamp', { ascending: false });
@@ -116,7 +120,7 @@ async function startServer() {
     
     if (supabase) {
       try {
-        const { data: user } = await supabase.from('users').select('*').eq('id', userId).single();
+        const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
         if (!user) return res.status(401).json({ error: "Unauthorized" });
 
         const newItem = {
@@ -153,10 +157,10 @@ async function startServer() {
     
     if (supabase) {
       try {
-        const { data: user } = await supabase.from('users').select('*').eq('id', userId).single();
+        const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
         if (!user) return res.status(401).json({ error: "Unauthorized" });
 
-        const { data: item } = await supabase.from('history').select('*').eq('id', id).single();
+        const { data: item } = await supabase.from('history').select('*').eq('id', id).maybeSingle();
         if (!item) return res.status(404).json({ error: "Not found" });
 
         if (user.role === "admin" || item.userId === user.id) {

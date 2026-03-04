@@ -12,7 +12,12 @@ export const authService = {
     });
 
     if (!response.ok) {
-      throw new Error("登录失败");
+      let errorMsg = "登录失败";
+      try {
+        const errorData = await response.json();
+        errorMsg = errorData.error || errorMsg;
+      } catch (e) {}
+      throw new Error(errorMsg);
     }
 
     const data = await response.json();
@@ -24,9 +29,30 @@ export const authService = {
     throw new Error("邮箱或密码错误");
   },
 
-  // Register (same as login for mock backend)
+  // Register
   register: async (email: string, password: string, name: string): Promise<User> => {
-    return authService.login(email, password);
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name }),
+    });
+
+    if (!response.ok) {
+      let errorMsg = "注册失败";
+      try {
+        const errorData = await response.json();
+        errorMsg = errorData.error || errorMsg;
+      } catch (e) {}
+      throw new Error(errorMsg);
+    }
+
+    const data = await response.json();
+    if (data.success) {
+      localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(data.user));
+      return data.user;
+    }
+    
+    throw new Error("注册失败");
   },
 
   // Logout
