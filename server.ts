@@ -3,8 +3,8 @@ import { createServer as createViteServer } from "vite";
 import { HistoryItem, User } from "./src/types";
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 // Mock Database (Fallback if Supabase is not configured)
@@ -61,7 +61,8 @@ async function startServer() {
         }
       } catch (err: any) {
         console.error("Supabase login error:", err);
-        res.status(500).json({ error: err.message });
+        const errorMessage = err.message || err.details || err.hint || JSON.stringify(err);
+        res.status(500).json({ error: `数据库错误: ${errorMessage}` });
       }
     } else {
       // Fallback to memory
