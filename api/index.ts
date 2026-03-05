@@ -72,9 +72,9 @@ app.post("/api/login", async (req: any, res: any) => {
       if (user) {
         return res.json({ success: true, user });
       } else {
-        // 自动注册
+        // 自动注册 - 手动生成 ID 以满足数据库非空约束
         const newUser = {
-          // 如果你的数据库 id 是自增或 UUID，请移除手动设置的 id
+          id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
           email,
           name: name || email.split('@')[0],
           role: email === 'iceman9226@gmail.com' ? 'admin' : 'user',
