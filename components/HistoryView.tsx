@@ -1,6 +1,6 @@
 import React from 'react';
 import { HistoryItem, User } from '../types';
-import { Clock, Trash2, ArrowRight, Calendar, ArrowLeft, User as UserIcon } from 'lucide-react';
+import { Clock, Trash2, ArrowRight, Calendar, ArrowLeft, User as UserIcon, FileImage } from 'lucide-react';
 
 interface HistoryViewProps {
   history: HistoryItem[];
@@ -24,7 +24,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
           </button>
         </div>
         <div className="bg-slate-100 p-6 rounded-full w-20 h-20 mx-auto flex items-center justify-center mb-4">
-          <Clock className="w-10 h-10 text-slate-400" />
+          <FileImage className="w-10 h-10 text-slate-400" />
         </div>
         <h3 className="text-lg font-medium text-slate-900">暂无历史记录</h3>
         <p className="text-slate-500 mt-2">完成一次分析后，记录将自动保存在这里。</p>
@@ -53,7 +53,6 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Clock className="w-6 h-6 text-slate-400" />
             历史记录 {currentUser?.role === 'admin' && <span className="text-sm font-normal text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">管理员视图</span>}
           </h2>
         </div>

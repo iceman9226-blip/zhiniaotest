@@ -52,6 +52,23 @@ const App: React.FC = () => {
 
   const { showToast } = useToast();
 
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    setIsUserMenuOpen(false);
+    setView("home");
+    showToast("已退出登录", "info");
+  };
+
+  const handleApiError = (err: any) => {
+    if (err.status === 401 || err.message === "Unauthorized") {
+      handleLogout();
+      showToast("会话已过期，请重新登录", "error");
+      return true;
+    }
+    return false;
+  };
+
   // Initialize Auth
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -83,7 +100,9 @@ const App: React.FC = () => {
           setHistory(data);
         } else {
           const err = await response.json();
-          showToast(err.error || "加载历史记录失败", "error");
+          if (!handleApiError({ status: response.status, message: err.error })) {
+            showToast(err.error || "加载历史记录失败", "error");
+          }
         }
       } catch (e) {
         console.error("Failed to load history", e);
@@ -127,7 +146,9 @@ const App: React.FC = () => {
         setHistory([data.item, ...history]);
       } else {
         const err = await response.json();
-        showToast(err.error || "保存历史记录失败", "error");
+        if (!handleApiError({ status: response.status, message: err.error })) {
+          showToast(err.error || "保存历史记录失败", "error");
+        }
       }
     } catch (e) {
       console.error("Failed to save history", e);
@@ -156,7 +177,9 @@ const App: React.FC = () => {
         showToast("记录已删除", "success");
       } else {
         const err = await response.json();
-        showToast(err.error || "删除记录失败", "error");
+        if (!handleApiError({ status: response.status, message: err.error })) {
+          showToast(err.error || "删除记录失败", "error");
+        }
       }
     } catch (e) {
       console.error("Failed to delete history", e);
@@ -207,14 +230,6 @@ const App: React.FC = () => {
       setPreview(null);
       setView("home");
     }
-  };
-
-  const handleLogout = () => {
-    authService.logout();
-    setUser(null);
-    setIsUserMenuOpen(false);
-    setView("home");
-    showToast("已退出登录", "info");
   };
 
   return (

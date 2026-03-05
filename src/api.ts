@@ -70,11 +70,11 @@ app.post("/api/login", asyncHandler(async (req: any, res: any) => {
 
 app.get("/api/history", asyncHandler(async (req: any, res: any) => {
   const userId = req.headers['x-user-id'] as string;
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  if (!userId) return res.status(401).json({ error: "Unauthorized: Missing User ID" });
 
   if (supabase) {
     const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!user) return res.status(401).json({ error: "Unauthorized: User not found in database" });
 
     let query = supabase.from('history').select('*').order('timestamp', { ascending: false });
     if (user.role !== 'admin') query = query.eq('userId', userId);
@@ -84,7 +84,7 @@ app.get("/api/history", asyncHandler(async (req: any, res: any) => {
     return res.json(data);
   } else {
     const user = memoryUsers.find((u) => u.id === userId);
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!user) return res.status(401).json({ error: "Unauthorized: User session expired or server restarted" });
     const data = user.role === "admin" ? memoryHistoryDb : memoryHistoryDb.filter((h) => h.userId === userId);
     return res.json([...data].sort((a, b) => b.timestamp - a.timestamp));
   }
@@ -92,11 +92,11 @@ app.get("/api/history", asyncHandler(async (req: any, res: any) => {
 
 app.post("/api/history", asyncHandler(async (req: any, res: any) => {
   const userId = req.headers['x-user-id'] as string;
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  if (!userId) return res.status(401).json({ error: "Unauthorized: Missing User ID" });
 
   if (supabase) {
     const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!user) return res.status(401).json({ error: "Unauthorized: User not found in database" });
 
     const newItem = { ...req.body, userId: user.id, userName: user.name };
     const { data, error } = await supabase.from('history').insert([newItem]).select().single();
@@ -104,7 +104,7 @@ app.post("/api/history", asyncHandler(async (req: any, res: any) => {
     return res.json({ success: true, item: data });
   } else {
     const user = memoryUsers.find((u) => u.id === userId);
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!user) return res.status(401).json({ error: "Unauthorized: User session expired or server restarted" });
     const newItem = { ...req.body, userId: user.id, userName: user.name };
     memoryHistoryDb.push(newItem);
     return res.json({ success: true, item: newItem });
@@ -114,11 +114,11 @@ app.post("/api/history", asyncHandler(async (req: any, res: any) => {
 app.delete("/api/history/:id", asyncHandler(async (req: any, res: any) => {
   const userId = req.headers['x-user-id'] as string;
   const { id } = req.params;
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  if (!userId) return res.status(401).json({ error: "Unauthorized: Missing User ID" });
 
   if (supabase) {
     const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!user) return res.status(401).json({ error: "Unauthorized: User not found in database" });
 
     const { data: item } = await supabase.from('history').select('*').eq('id', id).maybeSingle();
     if (!item) return res.status(404).json({ error: "Not found" });
@@ -131,7 +131,7 @@ app.delete("/api/history/:id", asyncHandler(async (req: any, res: any) => {
     return res.status(403).json({ error: "Forbidden" });
   } else {
     const user = memoryUsers.find((u) => u.id === userId);
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!user) return res.status(401).json({ error: "Unauthorized: User session expired or server restarted" });
     const itemIndex = memoryHistoryDb.findIndex((h) => h.id === id);
     if (itemIndex === -1) return res.status(404).json({ error: "Not found" });
     const item = memoryHistoryDb[itemIndex];
