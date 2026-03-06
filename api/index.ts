@@ -40,9 +40,8 @@ let memoryHistoryDb: any[] = [];
 const sendError = (res: any, err: any, context: string) => {
   console.error(`[${context}] Error:`, err);
   res.status(500).json({
-    error: "Internal Server Error",
+    error: err.message || "Internal Server Error",
     context,
-    message: err.message || String(err),
     details: err.details || err.hint || null
   });
 };
@@ -114,7 +113,8 @@ app.get("/api/history", async (req: any, res: any) => {
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     if (supabase) {
-      const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+      const { data: user, error: userError } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+      if (userError) throw userError;
       if (!user) return res.status(401).json({ error: "User not found" });
 
       let query = supabase.from('history').select('*').order('timestamp', { ascending: false });
@@ -143,10 +143,19 @@ app.post("/api/history", async (req: any, res: any) => {
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     if (supabase) {
-      const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+      const { data: user, error: userError } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+      if (userError) throw userError;
       if (!user) return res.status(401).json({ error: "User not found" });
 
-      const newItem = { ...req.body, userId: user.id, userName: user.name };
+      const { id, previewUrl, ...rest } = req.body;
+      const newItem = { 
+        id: id || Date.now().toString(),
+        previewUrl: previewUrl,
+        ...rest, 
+        userId: user.id, 
+        userName: user.name 
+      };
+
       const { data, error } = await supabase.from('history').insert([newItem]).select().single();
       if (error) throw error;
       return res.json({ success: true, item: data });
@@ -170,10 +179,12 @@ app.delete("/api/history/:id", async (req: any, res: any) => {
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     if (supabase) {
-      const { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+      const { data: user, error: userError } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+      if (userError) throw userError;
       if (!user) return res.status(401).json({ error: "User not found" });
 
-      const { data: item } = await supabase.from('history').select('*').eq('id', id).maybeSingle();
+      const { data: item, error: itemError } = await supabase.from('history').select('*').eq('id', id).maybeSingle();
+      if (itemError) throw itemError;
       if (!item) return res.status(404).json({ error: "Item not found" });
 
       if (user.role === "admin" || item.userId === user.id) {
