@@ -5,12 +5,24 @@ import {
   HelpCircle,
   CheckCircle2,
   AlertCircle,
+  ArrowLeft,
 } from "lucide-react";
 
-const HelpView: React.FC = () => {
+interface HelpViewProps {
+  onBack: () => void;
+}
+
+const HelpView: React.FC<HelpViewProps> = ({ onBack }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in duration-500 pb-20">
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-4 relative">
+        <button
+          onClick={onBack}
+          className="absolute left-0 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors"
+          title="返回首页"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
         <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
           帮助与文档
         </h1>
@@ -31,9 +43,7 @@ const HelpView: React.FC = () => {
         </div>
         <div className="prose prose-slate max-w-none text-slate-600 space-y-4">
           <p>
-            本系统基于业界权威的“B端产品易用性度量标准”（Ease of Use Metric for
-            Cloud
-            Product），结合尼尔森十大可用性原则，从六个核心维度对高保真原型进行深度评估：
+            本系统基于业界权威的“B端产品易用性度量标准”，结合尼尔森十大可用性原则，从六个核心维度对高保真原型进行深度评估：
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <div className="border border-slate-100 p-4 rounded-xl bg-slate-50">
@@ -104,8 +114,7 @@ const HelpView: React.FC = () => {
         </div>
         <div className="space-y-6 text-slate-600">
           <p>
-            我们的系统采用先进的多模态大语言模型（Gemini Pro
-            Vision），通过以下步骤对您的设计进行深度解析：
+            我们的系统采用先进的多模态大语言模型，通过以下步骤对您的设计进行深度解析：
           </p>
           <ol className="relative border-l border-slate-200 ml-3 space-y-6">
             <li className="pl-6 relative">
@@ -198,8 +207,7 @@ const HelpView: React.FC = () => {
               如何提高 AI 分析的质量？
             </h3>
             <p className="text-slate-600 text-sm mt-2 ml-7">
-              上传包含完整上下文的页面截图（避免只截取局部组件），并在图片中保留清晰的文本和交互状态（如
-              Hover、Active 状态），有助于 AI 更好地理解您的设计意图。
+              上传包含完整上下文的页面截图（避免只截取局部组件），并在图片中保留清晰的文本和交互状态，有助于 AI 更好地理解您的设计意图。
             </p>
           </div>
         </div>

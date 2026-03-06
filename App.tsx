@@ -257,22 +257,22 @@ const App: React.FC = () => {
       {/* Lightbox (Keep Dark Overlay for Focus) */}
       {isLightboxOpen && preview && (
         <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-8 backdrop-blur-md"
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-8 backdrop-blur-md cursor-pointer"
           onClick={() => setIsLightboxOpen(false)}
         >
-          <button className="absolute top-4 right-4 p-2 bg-white/10 text-white rounded-full hover:bg-white/20">
+          <button className="absolute top-4 right-4 p-2 bg-white/10 text-white rounded-full hover:bg-white/20 cursor-pointer">
             <X />
           </button>
           <img
             src={preview}
-            className="max-w-full max-h-full object-contain rounded-lg border border-slate-700 shadow-2xl"
+            className="max-w-full max-h-full object-contain rounded-lg border border-slate-700 shadow-2xl cursor-default"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
       )}
 
       {/* Nav */}
-      <nav className="bg-white/70 backdrop-blur-xl border-b border-white sticky top-0 z-50">
+      <nav className="bg-white/70 backdrop-blur-xl border-b border-white fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
           <div
             className="flex items-center gap-2 cursor-pointer"
@@ -318,7 +318,7 @@ const App: React.FC = () => {
                 {isUserMenuOpen && (
                   <>
                     <div
-                      className="fixed inset-0 z-10"
+                      className="fixed inset-0 z-10 cursor-pointer"
                       onClick={() => setIsUserMenuOpen(false)}
                     ></div>
                     <div className="absolute right-0 mt-2 w-48 bg-white/80 backdrop-blur-xl border border-white/50 rounded-xl shadow-xl z-20 py-1 animate-in slide-in-from-top-2 fade-in duration-200">
@@ -350,7 +350,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative mt-16">
         {view === "home" && (
           <div 
             className="text-center mb-16 animate-in fade-in slide-in-from-bottom-6 duration-1000"
@@ -399,7 +399,7 @@ const App: React.FC = () => {
           />
         )}
 
-        {view === "help" && <HelpView />}
+        {view === "help" && <HelpView onBack={() => setView("home")} />}
 
         {view === "analyzing" && (
           <div className="flex flex-col items-center justify-center py-32 animate-in fade-in">
@@ -464,7 +464,7 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
               <div className="lg:col-span-1 sticky top-24">
                 <div
-                  className="bg-white p-3 rounded-2xl border border-slate-200 shadow-lg cursor-zoom-in group"
+                  className="bg-white p-3 rounded-2xl border border-slate-200 shadow-lg cursor-pointer group"
                   onClick={() => setIsLightboxOpen(true)}
                 >
                   <div className="aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-100">

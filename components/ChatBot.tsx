@@ -36,17 +36,38 @@ const ChatBot: React.FC<ChatBotProps> = ({ base64Image, mimeType, analysisResult
     try {
       const stream = sendChatMessage(userMsg, messages, base64Image, mimeType, analysisResult);
       
-      let fullResponse = '';
       setMessages(prev => [...prev, { role: 'model', text: '' }]);
 
+      let displayResponse = '';
+      let buffer = '';
+      let isStreamFinished = false;
+
+      const drainBuffer = async () => {
+        while (!isStreamFinished || buffer.length > 0) {
+          if (buffer.length > 0) {
+            // Take more characters if buffer gets large to avoid falling too far behind
+            const charsToTake = buffer.length > 50 ? 3 : 1;
+            displayResponse += buffer.substring(0, charsToTake);
+            buffer = buffer.substring(charsToTake);
+            
+            setMessages(prev => {
+              const newMessages = [...prev];
+              newMessages[newMessages.length - 1].text = displayResponse;
+              return newMessages;
+            });
+          }
+          await new Promise(resolve => setTimeout(resolve, 20));
+        }
+      };
+
+      const drainPromise = drainBuffer();
+
       for await (const chunk of stream) {
-        fullResponse += chunk;
-        setMessages(prev => {
-          const newMessages = [...prev];
-          newMessages[newMessages.length - 1].text = fullResponse;
-          return newMessages;
-        });
+        buffer += chunk;
       }
+      isStreamFinished = true;
+      await drainPromise;
+
     } catch (error: any) {
       console.error("Chat error:", error);
       setMessages(prev => [
@@ -145,9 +166,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ base64Image, mimeType, analysisResult
             
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden border border-slate-100 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-white'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden border border-slate-100 ${msg.role === 'user' ? 'bg-[#FF8839]/10' : 'bg-white'}`}>
                   {msg.role === 'user' ? (
-                    <User className="w-5 h-5 text-blue-600" />
+                    <User className="w-5 h-5 text-[#FF8839]" />
                   ) : (
                     <img 
                       src="https://nimg.ws.126.net/?url=http%3A%2F%2Fspider.ws.126.net%2Fa51f9638ba088baf086f6559b2f080ff.jpeg&thumbnail=660x2147483647&quality=80&type=jpg" 
@@ -156,7 +177,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ base64Image, mimeType, analysisResult
                     />
                   )}
                 </div>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm'}`}>
+                <div className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${msg.role === 'user' ? 'bg-[#FF8839] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm'}`}>
                   {msg.role === 'user' ? (
                     msg.text
                   ) : (

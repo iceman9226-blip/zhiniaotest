@@ -5,3 +5,19 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* Ensure all clickable elements have a pointer cursor */
+button, 
+a, 
+[role="button"], 
+[onclick],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Except when disabled */
+button:disabled,
+a:disabled,
+[disabled] {
+  cursor: not-allowed !important;
+}
