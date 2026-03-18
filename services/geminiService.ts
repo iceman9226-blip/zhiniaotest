@@ -16,12 +16,16 @@ const getRatingLevel = (score: number) => {
   return '较差';
 };
 
-export const analyzeImage = async (base64Image: string, mimeType: string, sourceUrl?: string): Promise<AnalysisResult> => {
+export const analyzeImage = async (base64Image: string, mimeType: string, sourceUrl?: string, userDescription?: string): Promise<AnalysisResult> => {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("API Key is missing");
   }
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+  const prompt = userDescription 
+    ? `${SYSTEM_PROMPT}\n\n---\n用户提供的补充说明/需求背景：\n${userDescription}\n请在分析时结合上述用户提供的背景信息。`
+    : SYSTEM_PROMPT;
 
   try {
     const response = await ai.models.generateContent({
@@ -29,7 +33,7 @@ export const analyzeImage = async (base64Image: string, mimeType: string, source
       contents: {
         parts: [
           { inlineData: { mimeType: mimeType || 'image/jpeg', data: base64Image } },
-          { text: SYSTEM_PROMPT }
+          { text: prompt }
         ]
       },
       config: {
@@ -105,7 +109,8 @@ export const analyzeImage = async (base64Image: string, mimeType: string, source
       issues,
       summary: rawData.summary,
       recommendations: rawData.recommendations,
-      sourceUrl
+      sourceUrl,
+      userDescription
     };
 
   } catch (error: any) {

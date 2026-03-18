@@ -63,6 +63,7 @@ export interface AnalysisResult {
   summary: string;
   recommendations: string[];
   sourceUrl?: string; // Optional URL for Figma or other sources
+  userDescription?: string; // Optional user provided context
 }
 
 export interface HistoryItem {
