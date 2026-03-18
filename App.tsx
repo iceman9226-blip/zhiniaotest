@@ -130,8 +130,16 @@ const App: React.FC = () => {
     };
 
     if (!user) {
-      setHistory(prev => [newItem, ...prev].slice(0, MAX_HISTORY_ITEMS));
-      localStorage.setItem("pem_history_guest", JSON.stringify([newItem, ...history].slice(0, MAX_HISTORY_ITEMS)));
+      try {
+        const newHistory = [newItem, ...history].slice(0, MAX_HISTORY_ITEMS);
+        localStorage.setItem("pem_history_guest", JSON.stringify(newHistory));
+        setHistory(newHistory);
+      } catch (e) {
+        console.error("Failed to save to localStorage", e);
+        showToast("图片过大，无法保存到本地历史记录。建议登录后保存。", "error");
+        // Still update state so it's visible in current session
+        setHistory(prev => [newItem, ...prev].slice(0, MAX_HISTORY_ITEMS));
+      }
       return;
     }
 

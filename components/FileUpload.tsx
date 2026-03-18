@@ -75,15 +75,55 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, isAnalyzing }) =>
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
-      const base64 = result.split(',')[1];
+      const originalBase64 = result.split(',')[1];
       
-      clearInterval(progressInterval);
-      setUploadProgress(100);
+      // Generate a compressed thumbnail for history/preview to avoid quota issues
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const MAX_DIMENSION = 1200; // Smaller dimension for history preview
+
+        if (width > height && width > MAX_DIMENSION) {
+          height *= MAX_DIMENSION / width;
+          width = MAX_DIMENSION;
+        } else if (height > MAX_DIMENSION) {
+          width *= MAX_DIMENSION / height;
+          height = MAX_DIMENSION;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        let previewUrl = result;
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          previewUrl = canvas.toDataURL('image/jpeg', 0.75); // Compress for history
+        }
+
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+        
+        setTimeout(() => {
+          setIsUploading(false);
+          // Pass originalBase64 for Gemini, previewUrl for UI/History
+          onFileSelect(originalBase64, previewUrl, undefined, file.type);
+        }, 300);
+      };
       
-      setTimeout(() => {
-        setIsUploading(false);
-        onFileSelect(base64, result, undefined, file.type);
-      }, 300);
+      img.onerror = () => {
+        // Fallback if image loading fails
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+        setTimeout(() => {
+          setIsUploading(false);
+          onFileSelect(originalBase64, result, undefined, file.type);
+        }, 300);
+      };
+      
+      img.src = result;
     };
     reader.onerror = () => {
       clearInterval(progressInterval);
