@@ -186,30 +186,20 @@ const ChatBot: React.FC<ChatBotProps> = ({ base64Image, mimeType, analysisResult
                 <div className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${msg.role === 'user' ? 'bg-[#FF8839] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm'}`}>
                   {msg.role === 'user' ? (
                     msg.text
-                  ) : (
+                  ) : msg.text ? (
                     <div className="markdown-body prose prose-sm prose-slate max-w-none">
                       <Markdown>{msg.text}</Markdown>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 h-5 px-1">
+                      <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   )}
                 </div>
               </div>
             ))}
-            
-            {isLoading && messages[messages.length - 1]?.role === 'user' && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-100">
-                   <img 
-                      src="https://nimg.ws.126.net/?url=http%3A%2F%2Fspider.ws.126.net%2Fa51f9638ba088baf086f6559b2f080ff.jpeg&thumbnail=660x2147483647&quality=80&type=jpg" 
-                      alt="Nielsen"
-                      className="w-full h-full object-cover"
-                    />
-                </div>
-                <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-[#FF8839]" />
-                  <span className="text-xs text-slate-500">正在思考...</span>
-                </div>
-              </div>
-            )}
             <div ref={messagesEndRef} />
           </div>
 

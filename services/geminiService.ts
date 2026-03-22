@@ -25,7 +25,7 @@ export const analyzeImage = async (base64Image: string, mimeType: string, source
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3-flash-preview',
       contents: {
         parts: [
           { inlineData: { mimeType: mimeType || 'image/jpeg', data: base64Image } },
@@ -34,7 +34,10 @@ export const analyzeImage = async (base64Image: string, mimeType: string, source
       },
       config: {
         responseMimeType: 'application/json',
-        temperature: 0.1,
+        temperature: 0,
+        topK: 1,
+        topP: 0.1,
+        seed: 42,
       }
     });
 
@@ -224,7 +227,7 @@ export const sendChatMessage = async function* (
 
   try {
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3-flash-preview',
       contents,
       config: {
         systemInstruction,

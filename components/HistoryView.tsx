@@ -106,9 +106,17 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
                  </div>
                </div>
 
-               <p className="text-xs text-slate-500 line-clamp-2 mb-4 flex-grow">
-                 {item.result.summary}
-               </p>
+               <div className="flex-grow mb-4 flex flex-col gap-2">
+                 {item.result.userDescription && (
+                   <div className="text-xs text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 line-clamp-2">
+                     <span className="font-semibold text-slate-500">补充说明：</span>
+                     {item.result.userDescription}
+                   </div>
+                 )}
+                 <p className="text-xs text-slate-500 line-clamp-2">
+                   {item.result.summary}
+                 </p>
+               </div>
 
                <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
                   <div className="flex gap-4">
