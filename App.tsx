@@ -44,7 +44,6 @@ const App: React.FC = () => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [gradientPos, setGradientPos] = useState(50);
-  const [userDescription, setUserDescription] = useState("");
 
   // Auth State
   const [user, setUser] = useState<User | null>(null);
@@ -226,7 +225,7 @@ const App: React.FC = () => {
     }, 100);
 
     try {
-      const data = await analyzeImage(base64, mimeType, sourceUrl, userDescription);
+      const data = await analyzeImage(base64, mimeType, sourceUrl);
       clearInterval(interval);
       setProgress(100);
       
@@ -234,7 +233,6 @@ const App: React.FC = () => {
         setResult(data);
         saveToHistory(data, previewUrl);
         setView("result");
-        setUserDescription("");
         showToast("分析完成", "success");
       }, 500);
     } catch (error: any) {
@@ -379,14 +377,6 @@ const App: React.FC = () => {
               上传高保真原型图，AI 将基于 6 项关键易用性指标进行深度启发式评估。
             </p>
             <div className="max-w-3xl mx-auto mt-12 bg-white/50 backdrop-blur-xl rounded-2xl p-2 border border-white shadow-2xl shadow-slate-200/50">
-              <div className="p-4 border-b border-slate-100">
-                <textarea
-                  value={userDescription}
-                  onChange={(e) => setUserDescription(e.target.value)}
-                  placeholder="（选填）描述需求背景、交互说明或您特别关注的可用性问题..."
-                  className="w-full h-24 p-3 rounded-xl bg-white/60 border border-slate-200 focus:border-[#FF8839] focus:ring-2 focus:ring-[#FF8839]/20 transition-all resize-none text-slate-700 placeholder:text-slate-400"
-                />
-              </div>
               <FileUpload onFileSelect={handleFileSelect} isAnalyzing={false} />
             </div>
 

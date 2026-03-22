@@ -63,19 +63,6 @@ const AnalysisDashboard: React.FC<DashboardProps> = ({ result }) => {
           </div>
         )}
 
-        {/* User Description (if provided) */}
-        {result.userDescription && (
-          <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-            <h3 className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-              <Info className="w-4 h-4 text-slate-400" />
-              需求背景与交互说明
-            </h3>
-            <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
-              {result.userDescription}
-            </p>
-          </div>
-        )}
-
         {/* 2-Column Layout: Left (Visual Report) | Right (Text Summary) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-8 lg:gap-10">
           
