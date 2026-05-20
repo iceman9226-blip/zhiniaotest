@@ -86,11 +86,23 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
             <div className="p-5 flex flex-col flex-grow">
                <div className="flex justify-between items-start mb-4">
                  <div>
-                   <div className="text-3xl font-bold text-slate-900">{item.result.overallScore}</div>
-                   <div className={`text-xs font-bold uppercase tracking-wider mt-1 
-                     ${item.result.overallScore >= 7 ? 'text-[#FF8839]' : item.result.overallScore >= 5 ? 'text-yellow-600' : 'text-red-600'}`}>
-                     {item.result.ratingLevel}
-                   </div>
+                   {item.mode === 'ui-qa' && item.comparisonResult ? (
+                     <>
+                       <div className="text-3xl font-bold text-slate-900">{item.comparisonResult.overallMatchScore}%</div>
+                       <div className={`text-xs font-bold uppercase tracking-wider mt-1 
+                         ${item.comparisonResult.overallMatchScore >= 90 ? 'text-[#10b981]' : item.comparisonResult.overallMatchScore >= 75 ? 'text-[#FF8839]' : 'text-red-600'}`}>
+                         UI 走查
+                       </div>
+                     </>
+                   ) : (
+                     <>
+                       <div className="text-3xl font-bold text-slate-900">{item.result?.overallScore}</div>
+                       <div className={`text-xs font-bold uppercase tracking-wider mt-1 
+                         ${(item.result?.overallScore || 0) >= 7 ? 'text-[#FF8839]' : (item.result?.overallScore || 0) >= 5 ? 'text-yellow-600' : 'text-red-600'}`}>
+                         {item.result?.ratingLevel || '易用性评估'}
+                       </div>
+                     </>
+                   )}
                  </div>
                  <div className="flex flex-col items-end gap-1">
                    <div className="text-xs text-slate-400 flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
@@ -107,25 +119,32 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, onSelect, onDelete, 
                </div>
 
                <div className="flex-grow mb-4 flex flex-col gap-2">
-                 {item.result.userDescription && (
+                 {item.mode === 'usability' && item.result?.userDescription && (
                    <div className="text-xs text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 line-clamp-2">
                      <span className="font-semibold text-slate-500">补充说明：</span>
                      {item.result.userDescription}
                    </div>
                  )}
                  <p className="text-xs text-slate-500 line-clamp-2">
-                   {item.result.summary}
+                   {item.mode === 'ui-qa' && item.comparisonResult ? item.comparisonResult.summary : item.result?.summary}
                  </p>
                </div>
 
                <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
                   <div className="flex gap-4">
-                    {Object.entries(item.result.dimensions).map(([key, score]) => (
-                        <div key={key} className="flex flex-col items-center">
-                            <span className="text-[10px] text-slate-400 mb-0.5">{key}</span>
-                            <span className="text-xs font-semibold text-slate-700">{score as number}</span>
-                        </div>
-                    ))}
+                    {item.mode === 'ui-qa' && item.comparisonResult ? (
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 mb-0.5">发现差异项</span>
+                        <span className="text-xs font-semibold text-slate-700">{item.comparisonResult.discrepancies.length} 处</span>
+                      </div>
+                    ) : (
+                      item.result?.dimensions && Object.entries(item.result.dimensions).map(([key, score]) => (
+                          <div key={key} className="flex flex-col items-center">
+                              <span className="text-[10px] text-slate-400 mb-0.5">{key}</span>
+                              <span className="text-xs font-semibold text-slate-700">{score as number}</span>
+                          </div>
+                      ))
+                    )}
                   </div>
                   
                   <button 

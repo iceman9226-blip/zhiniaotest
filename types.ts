@@ -70,7 +70,10 @@ export interface HistoryItem {
   id: string;
   timestamp: number;
   previewUrl: string;
-  result: AnalysisResult;
+  devPreviewUrl?: string;
+  result: AnalysisResult; // keep for usability, optional if mode is qa
+  comparisonResult?: ComparisonResult;
+  mode?: 'usability' | 'ui-qa';
   userId?: string;
   userName?: string;
 }
@@ -80,4 +83,19 @@ export interface User {
   email: string;
   name: string;
   role: 'admin' | 'user';
+}
+
+export interface Discrepancy {
+  id: string;
+  area: string;
+  issue: string;
+  severity: 'High' | 'Medium' | 'Low';
+  suggestion: string;
+}
+
+export interface ComparisonResult {
+  title: string;
+  overallMatchScore: number;
+  summary: string;
+  discrepancies: Discrepancy[];
 }

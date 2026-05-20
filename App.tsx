@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { analyzeImage } from "./services/geminiService";
-import { AnalysisResult, Dimension, HistoryItem, User } from "./types";
+import { motion, AnimatePresence } from "motion/react";
+import { analyzeImage, compareDesignAndDev } from "./services/geminiService";
+import { AnalysisResult, Dimension, HistoryItem, User, ComparisonResult } from "./types";
 import FileUpload from "./components/FileUpload";
+import DualFileUpload from "./components/DualFileUpload";
 import AnalysisDashboard from "./components/AnalysisDashboard";
+import ComparisonDashboard from "./components/ComparisonDashboard";
 import HistoryView from "./components/HistoryView";
 import AuthModal from "./components/AuthModal";
 import HelpView from "./components/HelpView";
@@ -36,12 +39,15 @@ const MAX_HISTORY_ITEMS = 5;
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>("home");
+  const [appMode, setAppMode] = useState<'usability' | 'ui-qa'>('usability');
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [devPreview, setDevPreview] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const [reportTitle, setReportTitle] = useState("分析报告");
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [gradientPos, setGradientPos] = useState(50);
   const [userDescription, setUserDescription] = useState("");
@@ -122,12 +128,15 @@ const App: React.FC = () => {
     if (result) setReportTitle(result.title || "分析报告");
   }, [result]);
 
-  const saveToHistory = async (newResult: AnalysisResult, imagePreview: string) => {
+  const saveToHistory = async (newResult: AnalysisResult | null, imagePreview: string, overrideMode?: 'usability' | 'ui-qa', compData?: ComparisonResult, devImagePreview?: string) => {
     const newItem: HistoryItem = {
       id: Date.now().toString(),
       timestamp: Date.now(),
       previewUrl: imagePreview,
-      result: newResult,
+      devPreviewUrl: devImagePreview,
+      result: newResult as AnalysisResult,
+      comparisonResult: compData,
+      mode: overrideMode || appMode,
     };
 
     if (!user) {
@@ -168,6 +177,40 @@ const App: React.FC = () => {
     }
   };
 
+  const handleCompareStart = async (designBase64: string, devBase64: string, mimeType: string) => {
+    setPreview(`data:${mimeType};base64,${designBase64}`); // Use design as preview
+    setDevPreview(`data:${mimeType};base64,${devBase64}`);
+    setView("analyzing");
+    setComparisonResult(null);
+    setProgress(0);
+
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        const elapsed = Date.now() - startTime;
+        const newProgress = 95 * (1 - Math.exp(-elapsed / 8000));
+        return Math.min(newProgress, 95);
+      });
+    }, 100);
+
+    try {
+      const data = await compareDesignAndDev(designBase64, devBase64, mimeType);
+      clearInterval(interval);
+      setProgress(100);
+      
+      setTimeout(() => {
+        setComparisonResult(data);
+        saveToHistory(null, `data:${mimeType};base64,${designBase64}`, 'ui-qa', data, `data:${mimeType};base64,${devBase64}`);
+        setView("result");
+        showToast("走查完成", "success");
+      }, 500);
+    } catch (error: any) {
+      clearInterval(interval);
+      showToast(error.message || "走查失败，请稍后重试。", "error");
+      setView("home");
+    }
+  };
+
   const handleDeleteHistory = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -200,7 +243,14 @@ const App: React.FC = () => {
   };
 
   const handleSelectHistory = (item: HistoryItem) => {
-    setResult(item.result);
+    setDevPreview(item.devPreviewUrl || null);
+    if (item.mode === 'ui-qa' && item.comparisonResult) {
+      setComparisonResult(item.comparisonResult);
+      setAppMode('ui-qa');
+    } else {
+      setResult(item.result);
+      setAppMode('usability');
+    }
     setPreview(item.previewUrl);
     setView("result");
   };
@@ -259,22 +309,24 @@ const App: React.FC = () => {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
         {/* Rotating Glow - Larger and more obvious deformation */}
-        <div className="absolute top-[-300px] w-[1200px] h-[800px] opacity-40">
-          <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,#FF8839_0deg,#8b5cf6_120deg,#ec4899_240deg,#FF8839_360deg)] animate-[spin_10s_linear_infinite] rounded-[40%_60%_70%_30%/40%_50%_60%_50%] blur-[100px]"></div>
-        </div>
+        {view === 'home' && (
+          <div className="absolute top-[-300px] w-[1200px] h-[800px] opacity-40">
+            <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,#FF8839_0deg,#8b5cf6_120deg,#ec4899_240deg,#FF8839_360deg)] animate-[spin_10s_linear_infinite] rounded-[40%_60%_70%_30%/40%_50%_60%_50%] blur-[100px]"></div>
+          </div>
+        )}
       </div>
 
       {/* Lightbox (Keep Dark Overlay for Focus) */}
-      {isLightboxOpen && preview && (
+      {lightboxImage && (
         <div
           className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-8 backdrop-blur-md cursor-pointer"
-          onClick={() => setIsLightboxOpen(false)}
+          onClick={() => setLightboxImage(null)}
         >
           <button className="absolute top-4 right-4 p-2 bg-white/10 text-white rounded-full hover:bg-white/20 cursor-pointer">
             <X />
           </button>
           <img
-            src={preview}
+            src={lightboxImage}
             className="max-w-full max-h-full object-contain rounded-lg border border-slate-700 shadow-2xl cursor-default"
             onClick={(e) => e.stopPropagation()}
           />
@@ -296,18 +348,54 @@ const App: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex-1 hidden md:flex justify-center items-center">
+            <div className="relative p-1 bg-slate-900/5 backdrop-blur-xl rounded-full border border-white/40 flex items-center shadow-[0_4px_12px_-2px_rgba(0,0,0,0.05)]">
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => { setAppMode('usability'); setView("home"); }}
+                  className={`relative z-10 px-5 py-1.5 rounded-full text-sm font-bold transition-colors duration-300 ${appMode === 'usability' ? 'text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  易用性评估
+                </button>
+                <button
+                  onClick={() => { setAppMode('ui-qa'); setView("home"); }}
+                  className={`relative z-10 px-5 py-1.5 rounded-full text-sm font-bold transition-colors duration-300 ${appMode === 'ui-qa' ? 'text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  UI 还原度走查
+                </button>
+                
+                {/* Active Highlight - Liquid Glass Animation */}
+                <motion.div
+                  className="absolute inset-0 z-0 bg-gradient-to-br from-[#FF8839] to-[#FF6B00] rounded-full shadow-lg shadow-[#FF8839]/20"
+                  initial={false}
+                  animate={{
+                    x: appMode === 'usability' ? 0 : '100%',
+                    width: '50%'
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setView("history")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all active:scale-95 ${view === "history" ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+              className={`p-2 rounded-full transition-all active:scale-95 ${view === "history" ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+              title="历史记录"
             >
-              <Clock className="w-4 h-4" /> 历史记录
+              <Clock className="w-5 h-5" />
             </button>
             <button
               onClick={() => setView("help")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all active:scale-95 ${view === "help" ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+              className={`p-2 rounded-full transition-all active:scale-95 ${view === "help" ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
+              title="帮助文档"
             >
-              <HelpCircle className="w-4 h-4" /> 帮助文档
+              <HelpCircle className="w-5 h-5" />
             </button>
 
             {/* Auth Menu */}
@@ -315,7 +403,7 @@ const App: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/50 text-slate-800 transition-all active:scale-95 shadow-sm"
+                  className="flex items-center gap-2 text-slate-800 transition-all active:scale-95"
                 >
                   <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#FF8839] to-purple-500 flex items-center justify-center text-[10px] font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
@@ -351,7 +439,7 @@ const App: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/40 hover:bg-white/60 backdrop-blur-md border border-white/50 text-slate-800 text-sm font-bold transition-all active:scale-95 shadow-sm"
+                className="flex items-center gap-1.5 text-slate-800 text-sm font-bold transition-all active:scale-95"
               >
                 <LogIn className="w-4 h-4" /> 登录 / 注册
               </button>
@@ -373,13 +461,19 @@ const App: React.FC = () => {
             <h1 
               className="inline-block text-5xl font-extrabold text-black/90 mb-6 tracking-tight transition-all duration-75 ease-out"
             >
-              B端产品易用性度量
+              {appMode === 'usability' ? 'B端产品易用性度量' : 'UI 设计还原度走查'}
             </h1>
             <p className="text-xl text-black/60 max-w-2xl mx-auto leading-relaxed">
-              上传高保真原型图，AI 将基于 6 项关键易用性指标进行深度启发式评估。
+              {appMode === 'usability' 
+                ? '上传高保真原型图，AI 将基于 6 项关键易用性指标进行深度启发式评估。' 
+                : '上传设计原稿与实际开发环境截图，AI 自动检测视觉和布局差异。'}
             </p>
-            <div className="max-w-3xl mx-auto mt-12 bg-white/50 backdrop-blur-xl rounded-2xl p-2 border border-white shadow-2xl shadow-slate-200/50">
-              <FileUpload onFileSelect={handleFileSelect} isAnalyzing={false} />
+            <div className="max-w-4xl mx-auto mt-12 bg-white/50 backdrop-blur-xl rounded-2xl p-4 border border-white shadow-2xl shadow-slate-200/50">
+              {appMode === 'usability' ? (
+                <FileUpload onFileSelect={handleFileSelect} isAnalyzing={false} />
+              ) : (
+                <DualFileUpload onCompareStart={handleCompareStart} isAnalyzing={false} />
+              )}
             </div>
 
             {/* Show login hint if guest */}
@@ -454,7 +548,7 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {view === "result" && result && (
+        {view === "result" && (result || comparisonResult) && (
           <div className="space-y-8 animate-in fade-in duration-700">
             <div className="flex items-center gap-4">
               <button
@@ -466,33 +560,55 @@ const App: React.FC = () => {
               </button>
               <div className="flex items-center flex-1 max-w-2xl">
                 <h1 className="text-2xl font-bold text-slate-900 truncate px-3 py-1.5">
-                  {reportTitle || "UI 易用性分析报告"}
+                  {appMode === 'usability' ? (reportTitle || "UI 易用性分析报告") : "UI设计还原度走查报告"}
                 </h1>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-              <div className="lg:col-span-1 sticky top-24">
+              <div className="lg:col-span-1 sticky top-24 flex gap-4 overflow-x-auto lg:flex-col pb-2 lg:pb-0">
                 <div
-                  className="bg-white p-3 rounded-2xl border border-slate-200 shadow-lg cursor-pointer group"
-                  onClick={() => setIsLightboxOpen(true)}
+                  className="bg-white p-3 rounded-2xl border border-slate-200 shadow-lg cursor-pointer group flex-shrink-0 w-64 lg:w-auto"
+                  onClick={() => setLightboxImage(preview)}
                 >
-                  <div className="aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-100">
+                  <div className="aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-100 relative">
                     <img
                       src={preview!}
                       className="max-w-full max-h-full object-contain mix-blend-multiply opacity-90 group-hover:opacity-100 transition-opacity"
                     />
+                    {appMode === 'ui-qa' && (
+                       <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">设计稿</div>
+                    )}
                   </div>
-                  <div className="mt-3 text-center text-[10px] text-slate-400 uppercase tracking-widest group-hover:text-[#FF8839] transition-colors">
-                    预览原稿
+                  <div className="mt-3 text-center text-[10px] text-slate-400 uppercase tracking-widest group-hover:text-[#FF8839] transition-colors font-semibold">
+                    {appMode === 'usability' ? '预览原稿' : '预览设计图'}
                   </div>
                 </div>
+                
+                {appMode === 'ui-qa' && devPreview && (
+                  <div
+                    className="bg-white p-3 rounded-2xl border border-slate-200 shadow-lg cursor-pointer group flex-shrink-0 w-64 lg:w-auto"
+                    onClick={() => setLightboxImage(devPreview)}
+                  >
+                    <div className="aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-100 relative">
+                      <img
+                        src={devPreview}
+                        className="max-w-full max-h-full object-contain mix-blend-multiply opacity-90 group-hover:opacity-100 transition-opacity"
+                      />
+                       <div className="absolute bottom-2 right-2 bg-[#FF8839]/90 text-white text-xs px-2 py-1 rounded shadow-sm">开发截图</div>
+                    </div>
+                    <div className="mt-3 text-center text-[10px] text-slate-400 uppercase tracking-widest group-hover:text-[#FF8839] transition-colors font-semibold">
+                      预览开发图
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="lg:col-span-3">
-                <AnalysisDashboard result={result} />
+                {appMode === 'usability' && result && <AnalysisDashboard result={result} />}
+                {appMode === 'ui-qa' && comparisonResult && <ComparisonDashboard result={comparisonResult} />}
               </div>
             </div>
-            {preview && (
+            {appMode === 'usability' && preview && result && (
               <ChatBot 
                 base64Image={preview.split(',')[1]} 
                 mimeType={preview.split(';')[0].split(':')[1]} 
@@ -501,6 +617,7 @@ const App: React.FC = () => {
             )}
           </div>
         )}
+
       </main>
     </div>
   );

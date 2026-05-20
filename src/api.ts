@@ -45,7 +45,7 @@ const memoryUsers: User[] = [
 let memoryHistoryDb: (HistoryItem & { userId: string; userName: string })[] = [];
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '100mb' }));
 
 // 全局错误处理中间件
 const asyncHandler = (fn: Function) => (req: any, res: any, next: any) => {

@@ -25,7 +25,7 @@ export const analyzeImage = async (base64Image: string, mimeType: string, source
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-pro-preview',
+      model: 'gemini-3.5-flash',
       contents: {
         parts: [
           { inlineData: { mimeType: mimeType || 'image/jpeg', data: base64Image } },
@@ -227,7 +227,7 @@ export const sendChatMessage = async function* (
 
   try {
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-3.1-pro-preview',
+      model: 'gemini-3.5-flash',
       contents,
       config: {
         systemInstruction,
@@ -266,5 +266,89 @@ export const sendChatMessage = async function* (
     }
 
     throw new Error(`对话失败: ${msg || "未知错误，请检查网络连接或控制台日志。"}`);
+  }
+};
+
+export const compareDesignAndDev = async (designBase64: string, devBase64: string, mimeType: string = 'image/jpeg'): Promise<any> => {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("API Key is missing");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  
+  const systemInstruction = `你是一位顶级的资深前端工程师和 UI 设计师组合，并且正在进行“视觉还原度走查（Design QA / Visual QA）”。
+你的任务是严格比对前两张图片：
+1. 第一张图是【设计原稿 (Design Mockup)】，即唯一的正确标准。
+2. 第二张图是【实际开发环境截图 (Dev Build)】，即被审查的对象。
+
+请仔细寻找第二张图中不符合第一张图的地方。主要检查：
+1. 布局与间距（Padding, Margin, 对齐方式）
+2. 颜色与透明度（背景色，文字色，边框色）
+3. 字体与排版（字号，字重，行高，字体溢出或截断）
+4. 元素缺失或多余（图标、按钮、装饰线等）
+5. 尺寸比例异常
+
+按照JSON格式返回发现的不一致点，包含以下字段：
+{
+  "title": "UI设计还原度走查报告",
+  "overallMatchScore": 95, // 0-100分，代表整体还原程度
+  "summary": "简短的总体评价...",
+  "discrepancies": [
+    {
+      "area": "指出问题所在的具体区域，如 '顶部导航栏左侧'",
+      "issue": "具体的不一致描述，如 'Logo旁边的间距过小，或者主按钮颜色错误'",
+      "severity": "High" | "Medium" | "Low", // High严重影响体验或视觉，Medium明显但不致命，Low细微的像素级误差
+      "suggestion": "修改建议，如 '建议增加 8px 的 margin-left' 或 '将颜色从 #ccc 改为 #666'"
+    }
+  ]
+}
+不要返回任何markdown框，只返回JSON字符串。`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: {
+        parts: [
+          { inlineData: { mimeType, data: designBase64 } },
+          { inlineData: { mimeType, data: devBase64 } },
+          { text: "请开始对比检查这两张图的差异（第一张是设计图，第二张是开发图），并输出 JSON。" }
+        ]
+      },
+      config: {
+        systemInstruction,
+        responseMimeType: 'application/json',
+        temperature: 0,
+        topK: 1,
+        seed: 42,
+      }
+    });
+
+    const text = response.text;
+    if (!text) throw new Error("No response from AI");
+
+    const cleanText = text.replace(/```json\n?|```/g, '').trim();
+    let rawData;
+    
+    try {
+        rawData = JSON.parse(cleanText);
+    } catch (e) {
+        console.error("JSON Parse Error. Raw Text:", text);
+        throw new Error("Failed to parse AI response.");
+    }
+
+    // Add unique IDs to discrepancies
+    rawData.discrepancies = rawData.discrepancies.map((d: any, index: number) => ({
+      id: `diff-${index}`,
+      ...d
+    }));
+
+    return rawData;
+
+  } catch (error: any) {
+    console.error("Comparison Failed:", error);
+    const msg = error.message || "";
+    if (msg.includes("API Key is missing")) throw new Error("API Key 缺失，请检查环境变量配置。");
+    if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED")) throw new Error("API 额度已耗尽。");
+    throw new Error(`分析失败: ${msg || "未知错误"}`);
   }
 };
