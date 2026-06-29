@@ -37,6 +37,41 @@ type ViewState = "home" | "analyzing" | "result" | "history" | "help";
 
 const MAX_HISTORY_ITEMS = 5;
 
+const compressForHistory = (base64Str: string | null): Promise<string | null> => {
+  if (!base64Str) return Promise.resolve(null);
+  if (base64Str.length < 50 * 1024) return Promise.resolve(base64Str);
+  
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+      const MAX_DIM = 480; // Small size for history thumbnail to avoid API payload limits
+      if (width > height && width > MAX_DIM) {
+        height *= MAX_DIM / width;
+        width = MAX_DIM;
+      } else if (height > MAX_DIM) {
+        width *= MAX_DIM / height;
+        height = MAX_DIM;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.5)); // 0.5 quality is perfect for preview thumbnails
+      } else {
+        resolve(base64Str);
+      }
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+    img.src = base64Str;
+  });
+};
+
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>("home");
   const [appMode, setAppMode] = useState<'usability' | 'ui-qa'>('usability');
@@ -129,11 +164,15 @@ const App: React.FC = () => {
   }, [result]);
 
   const saveToHistory = async (newResult: AnalysisResult | null, imagePreview: string, overrideMode?: 'usability' | 'ui-qa', compData?: ComparisonResult, devImagePreview?: string) => {
+    // Compress both image previews for history payload reduction
+    const compressedPreview = await compressForHistory(imagePreview);
+    const compressedDevPreview = devImagePreview ? await compressForHistory(devImagePreview) : undefined;
+
     const newItem: HistoryItem = {
       id: Date.now().toString(),
       timestamp: Date.now(),
-      previewUrl: imagePreview,
-      devPreviewUrl: devImagePreview,
+      previewUrl: compressedPreview || imagePreview,
+      devPreviewUrl: compressedDevPreview || devImagePreview,
       result: newResult as AnalysisResult,
       comparisonResult: compData,
       mode: overrideMode || appMode,
@@ -506,45 +545,102 @@ const App: React.FC = () => {
         {view === "help" && <HelpView onBack={() => setView("home")} />}
 
         {view === "analyzing" && (
-          <div className="flex flex-col items-center justify-center py-32 animate-in fade-in">
-            <div className="relative w-48 h-48 mb-8">
-              {/* Flying Icons */}
-              <FlyingIcons />
+          <div className="flex flex-col items-center justify-center py-20 min-h-[520px] animate-in fade-in duration-500">
+            {/* The Cinematic Scanner Container (Element 2: Background Grid) */}
+            <div className="relative w-full max-w-xl aspect-[1.4] md:aspect-[1.618] flex flex-col items-center justify-center p-8 mb-10 overflow-hidden rounded-3xl border border-slate-200/80 shadow-[0_20px_50px_rgba(0,0,0,0.04)] bg-white/40 backdrop-blur-xl">
+              
+              {/* Grid Backdrop Frame */}
+              <div className="absolute inset-0 rounded-3xl overflow-hidden">
+                {/* Tech Grid Pattern */}
+                <div 
+                  className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,136,57,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,136,57,0.06)_1px,transparent_1px)] bg-[size:24px_24px]"
+                />
+                
+                {/* Center Radial Soft Vignette */}
+                <div className="absolute inset-0 bg-radial-gradient from-white/90 via-white/40 to-transparent" />
 
-              <svg className="w-full h-full transform -rotate-90 relative z-10" viewBox="0 0 100 100">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  fill="none"
-                  stroke="#f1f5f9"
-                  strokeWidth="8"
+                {/* Element 2: Horizontal neon-orange scanning line moving top-to-bottom across grid with ease-in-out */}
+                <motion.div
+                  className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF8839] via-50% to-transparent shadow-[0_0_16px_5px_rgba(255,136,57,0.45)] z-10"
+                  animate={{
+                    top: ["0%", "100%", "0%"]
+                  }}
+                  transition={{
+                    duration: 3.5,
+                    ease: "easeInOut",
+                    repeat: Infinity
+                  }}
                 />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  fill="none"
-                  stroke="#FF8839"
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 45}`}
-                  strokeDashoffset={`${2 * Math.PI * 45 * (1 - progress / 100)}`}
-                  className="transition-all duration-300 ease-out"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                <span className="text-5xl font-bold text-slate-800">
-                  {Math.round(progress)}%
-                </span>
               </div>
+
+              {/* Element 1: Center Circular Orbit with Numeric Percentage & Photon */}
+              <div className="relative z-20 flex items-center justify-center">
+                
+                {/* Razor-thin Orbit Ring */}
+                <div className="relative w-56 h-56 rounded-full border border-[#FF8839]/20 flex items-center justify-center bg-white/10 backdrop-blur-sm">
+                  
+                  {/* Subtle soft glowing back-halo */}
+                  <div className="absolute inset-0 rounded-full bg-radial-gradient from-[#FF8839]/5 to-transparent blur-lg" />
+
+                  {/* Linear rotating photon ring container */}
+                  <motion.div 
+                    className="absolute inset-0"
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 4,
+                      ease: "linear",
+                      repeat: Infinity
+                    }}
+                  >
+                    {/* Glowing Photon Particle exact-centered on orbit boundary */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-gradient-to-r from-[#FF8839] to-[#FF6B00] rounded-full shadow-[0_0_12px_4px_rgba(255,136,57,0.7)] border-2 border-white" />
+                  </motion.div>
+
+                  {/* Inner breathing Glass Orb holding the numeric percentage */}
+                  <div className="absolute inset-2.5 bg-white/75 backdrop-blur-2xl rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.04),inset_0_2px_4px_rgba(255,255,255,0.85)] border border-white/60 flex flex-col items-center justify-center">
+                    
+                    {/* Element 1 (Center) Breathing scale effect */}
+                    <motion.div
+                      className="flex flex-col items-center justify-center text-center"
+                      animate={{
+                        scale: [1, 1.03, 1],
+                        opacity: [0.95, 1, 0.95]
+                      }}
+                      transition={{
+                        duration: 2.5,
+                        ease: "easeInOut",
+                        repeat: Infinity
+                      }}
+                    >
+                      <span className="text-6xl font-extrabold tracking-tight text-slate-800 tabular-nums">
+                        {Math.round(progress)}<span className="text-3xl font-medium text-slate-400 ml-0.5">%</span>
+                      </span>
+                      
+                      {/* Premium Technical Subtext */}
+                      <span className="text-[10px] font-bold text-[#FF8839] uppercase tracking-[0.25em] font-mono mt-1">
+                        Analyzing
+                      </span>
+                    </motion.div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
             </div>
-            <h2 className="text-3xl font-bold text-slate-900 mt-2">
-              深度分析中...
-            </h2>
-            <p className="text-slate-500 mt-4">
-              正在扫描视觉层级、操作路径与信息密度
-            </p>
+
+            {/* Tech-SaaS Description text */}
+            <div className="text-center space-y-2 relative z-20">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
+                {appMode === 'usability' ? 'UI 易用性智能评估中' : '界面设计还原度走查中'}
+              </h2>
+              <p className="text-sm font-medium text-slate-500 max-w-sm mx-auto leading-relaxed">
+                {appMode === 'usability' 
+                  ? '正在扫描视觉层级、操作热区与核心认知负荷因子...' 
+                  : '正在逐像素对齐设计规范，计算布局偏差与样式差异...'}
+              </p>
+            </div>
           </div>
         )}
 
